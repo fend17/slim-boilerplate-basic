@@ -18,3 +18,17 @@
 php -S localhost:3000 -t src/public
 ```
 * Then visit [`http://localhost:3000`](http://localhost:3000)
+
+## Troubleshooting
+
+If you are getting this error:
+```
+mysql driver not found
+```
+
+Find your `php.ini`-file and remove the semicolon in front of this line in the config-file:
+```ini
+extension=pdo_mysql.so
+```
+
+Then restart your PHP-server
