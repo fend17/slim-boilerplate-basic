@@ -40,9 +40,50 @@ $app->get('/', function ($request, $response, $args) {
  * Placeholder route
  * https://www.slimframework.com/docs/v3/objects/router.html
  */
-$app->get('/{name}', function ($request, $response, $args) {
-    $parameters = $request->getQueryParams();
-    return $response->withJson(['name' => $args['name']]);
+
+$app->get('/about', function ($request, $response, $args) {
+    // Create an array in PHP
+    $arr = [
+        "name"          => "Jesper",
+        "description"   => "Teacher"
+    ];
+    // Send it as an JSON-object
+    return $response->withJson($arr);
+});
+
+// $app->get('/{name}', function ($request, $response, $args) {
+//     $parameters = $request->getQueryParams();
+//     //die(var_dump($parameters));
+//     return $response->withJson(['name' => $args['name']]);
+// });
+
+$app->get('/books', function ($request, $response, $args) {
+    $getAll = $this->db->prepare("SELECT * FROM books");
+    $getAll->execute();
+    $allBooks = $getAll->fetchAll();
+    return $response->withJson($allBooks);
+});
+
+$app->post('/books', function ($request, $response, $args) {
+    $data = $request->getParsedBody();
+    $insertOne = $this->db->prepare(
+        "INSERT INTO books (title, authorID) 
+        VALUES (:title, :authorID)"
+    );
+    $insertOne->execute([
+        ':title'    => $data['title'],
+        ':authorID' => $data['authorID']
+    ]);
+    return $response->withJson($data);
+});
+
+$app->get('/books/{id}', function ($request, $response, $args) {
+    $getOne = $this->db->prepare("SELECT * FROM books WHERE id = :id");
+    $getOne->execute([
+        ":id" => $args['id']
+    ]);
+    $oneBook = $getOne->fetch();
+    return $response->withJson($oneBook);
 });
 
 $app->run();

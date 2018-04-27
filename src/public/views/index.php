@@ -12,4 +12,10 @@
   <h1>Slim Boilerplate Basic</h1>
 </body>
 
+<script>
+  fetch('/books')
+    .then(res => res.json())
+    .then(console.log)
+</script>
+
 </html>
