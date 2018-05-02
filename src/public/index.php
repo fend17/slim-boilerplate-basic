@@ -36,30 +36,33 @@ $app->get('/', function ($request, $response, $args) {
     return $this->view->render($response, 'index.php');
 });
 
-/**
- * Placeholder route
- * https://www.slimframework.com/docs/v3/objects/router.html
- */
-
-$app->get('/about', function ($request, $response, $args) {
-    // Create an array in PHP
-    $arr = [
-        "name"          => "Jesper",
-        "description"   => "Teacher"
-    ];
-    // Send it as an JSON-object
-    return $response->withJson($arr);
-});
-
-// $app->get('/{name}', function ($request, $response, $args) {
-//     $parameters = $request->getQueryParams();
-//     //die(var_dump($parameters));
-//     return $response->withJson(['name' => $args['name']]);
-// });
 
 $app->get('/books', function ($request, $response, $args) {
-    $getAll = $this->db->prepare("SELECT * FROM books");
-    $getAll->execute();
+    // Base Query
+    // Everything after ? is stored in 'getQueryParams()'
+    $query = $request->getQueryParams();
+    $sql = "SELECT * FROM BOOKS ";
+    $executeParams = [];
+    // If /books?limit=5 enter if-statement
+    if (isset($query['limit'])) {
+        $sql .= "LIMIT :limitParam";
+        $executeParams[':limitParam'] = (int) $query['limit'];
+    }
+
+    if (isset($query['author'])) {
+        $sql .= " WHERE authorID = :author";
+        $executeParams[':author'] = $query['author'];
+    }
+
+    // SELECT * FROM BOOKS WHERE title LIKE %rätte%;
+    if (isset($query['title'])) {
+        $sql .= " WHERE title LIKE :title";
+        $executeParams[':title'] = "%" . $query['title'] . "%";
+    }
+    
+    // The query must be built when we execute it
+    $getAll = $this->db->prepare($sql);
+    $getAll->execute($executeParams);
     $allBooks = $getAll->fetchAll();
     return $response->withJson($allBooks);
 });
@@ -85,5 +88,26 @@ $app->get('/books/{id}', function ($request, $response, $args) {
     $oneBook = $getOne->fetch();
     return $response->withJson($oneBook);
 });
+
+// DELETE
+$app->delete('/books/{id}', function ($request, $response, $args) {
+    $deleteOne = $this->db->prepare("DELETE FROM books WHERE id = :id");
+    $deleteOne->execute([
+        ":id" => $args['id']
+    ]);
+    return $response->withJson("Success");
+});
+
+// PATCH
+$app->patch('/books/{id}', function ($request, $response, $args) {
+    $patchOne = $this->db->prepare("DELETE FROM books WHERE id = :id");
+    $patchOne->execute([
+        ":id" => $args['id']
+    ]);
+    return $response->withJson("Success");
+});
+
+
+
 
 $app->run();
